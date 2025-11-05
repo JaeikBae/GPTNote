@@ -39,8 +39,12 @@ class Memory(Base):
     attachments: Mapped[list["Attachment"]] = relationship(
         back_populates="memory", cascade="all, delete-orphan"
     )
+    embedding: Mapped["MemoryEmbedding | None"] = relationship(
+        back_populates="memory", cascade="all, delete-orphan", uselist=False
+    )
 
 
 from app.models.attachment import Attachment  # noqa: E402
+from app.models.memory_embedding import MemoryEmbedding  # noqa: E402
 from app.models.user import User  # noqa: E402
 

@@ -3,14 +3,20 @@
 from __future__ import annotations
 
 import textwrap
-from typing import Any
+import uuid
+from typing import Any, Dict, List, Tuple
 
 from openai import OpenAI
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.repositories import MemoryRepository
-from app.schemas import AssistantChatRequest, AssistantChatResponse
+from app.schemas import (
+    AssistantChatRequest,
+    AssistantChatResponse,
+    AssistantContextMemory,
+)
+from app.services.rag_service import RAGService
 
 
 class AssistantService:
@@ -19,6 +25,7 @@ class AssistantService:
     def __init__(self, session: Session):
         self.session = session
         self.memory_repo = MemoryRepository(session)
+        self.rag_service = RAGService(session)
         self.settings = get_settings()
         self._client: OpenAI | None = None
 
@@ -29,7 +36,42 @@ class AssistantService:
             self._client = OpenAI(api_key=self.settings.openai_api_key)
         return self._client
 
-    def _collect_memories(self, memory_ids: list) -> tuple[list[Any], list[str]]:
+    @staticmethod
+    def _unique_ids(memory_ids: List[uuid.UUID]) -> List[uuid.UUID]:
+        seen: set[uuid.UUID] = set()
+        ordered: List[uuid.UUID] = []
+        for memory_id in memory_ids:
+            if memory_id not in seen:
+                seen.add(memory_id)
+                ordered.append(memory_id)
+        return ordered
+
+    def _resolve_memory_ids(
+        self, payload: AssistantChatRequest
+    ) -> Tuple[List[uuid.UUID], Dict[uuid.UUID, float]]:
+        resolved_ids: List[uuid.UUID] = []
+        rag_scores: Dict[uuid.UUID, float] = {}
+
+        if payload.memory_ids:
+            resolved_ids.extend(payload.memory_ids)
+
+        if payload.use_rag and payload.owner_id:
+            rag_results = self.rag_service.search(
+                payload.message,
+                owner_id=payload.owner_id,
+                top_k=payload.top_k,
+            )
+            for result in rag_results:
+                rag_scores[result.memory.id] = result.score
+                resolved_ids.append(result.memory.id)
+
+        return self._unique_ids(resolved_ids), rag_scores
+
+    def _collect_memories(
+        self,
+        memory_ids: list[uuid.UUID],
+        score_map: dict[uuid.UUID, float] | None = None,
+    ) -> tuple[list[Any], list[str]]:
         records = []
         snippets: list[str] = []
         for memory_id in memory_ids:
@@ -44,6 +86,8 @@ class AssistantService:
                 태그: {', '.join(memory.tags) if memory.tags else '없음'}
                 """
             ).strip()
+            if score_map and memory.id in score_map:
+                snippet += f"\n관련도 점수: {score_map[memory.id]:.3f}"
             snippets.append(snippet)
         return records, snippets
 
@@ -70,8 +114,8 @@ class AssistantService:
         return prompt
 
     def chat(self, payload: AssistantChatRequest) -> AssistantChatResponse:
-        memory_ids = payload.memory_ids or []
-        memory_records, snippets = self._collect_memories(memory_ids)
+        memory_ids, rag_scores = self._resolve_memory_ids(payload)
+        memory_records, snippets = self._collect_memories(memory_ids, rag_scores)
 
         if self.settings.openai_api_key:
             client = self._client_instance()
@@ -90,7 +134,21 @@ class AssistantService:
             reply = self._build_fallback_response(payload.message, snippets)
 
         used_ids = [memory.id for memory in memory_records]
-        return AssistantChatResponse(reply=reply, used_memory_ids=used_ids)
+        context = [
+            AssistantContextMemory(
+                memory_id=memory.id,
+                title=memory.title,
+                snippet=snippets[idx],
+                score=rag_scores.get(memory.id),
+            )
+            for idx, memory in enumerate(memory_records)
+        ]
+
+        return AssistantChatResponse(
+            reply=reply,
+            used_memory_ids=used_ids,
+            context=context,
+        )
 
     @staticmethod
     def _build_fallback_response(message: str, snippets: list[str]) -> str:

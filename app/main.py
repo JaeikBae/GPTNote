@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import api
 from app.config import get_settings
 from app.database import Base, engine
+from app.workflows import initialize_workflows
 
 
 def create_app() -> FastAPI:
@@ -15,6 +16,7 @@ def create_app() -> FastAPI:
     Base.metadata.create_all(bind=engine)
 
     app = FastAPI(title=settings.project_name)
+    initialize_workflows()
 
     app.add_middleware(
         CORSMiddleware,

@@ -19,7 +19,12 @@ class Settings(BaseSettings):
     storage_dir: Path = Path(__file__).resolve().parent / "storage"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
+    openai_embedding_model: str = "text-embedding-3-small"
+    openai_transcription_model: str = "gpt-4o-transcribe"
     cors_allow_origins: list[str] = ["*"]
+    rag_enabled: bool = True
+    rag_default_top_k: int = 3
+    rag_local_vector_size: int = 512
 
     model_config = SettingsConfigDict(env_prefix="MINDDOCK_", env_file=".env")
 

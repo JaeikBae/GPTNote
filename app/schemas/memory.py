@@ -26,6 +26,7 @@ class MemoryUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
     content: str | None = None
     tags: list[str] | None = None
+    captured_at: datetime | None = None
     source_device: str | None = Field(default=None, max_length=100)
     source_location: str | None = Field(default=None, max_length=255)
     context: dict | None = None

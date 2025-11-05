@@ -31,6 +31,10 @@ class MemoryRepository:
         )
         return list(self.session.scalars(stmt).all())
 
+    def list_all(self) -> list[Memory]:
+        stmt = select(Memory).order_by(Memory.created_at.desc())
+        return list(self.session.scalars(stmt).all())
+
     def update(self, memory: Memory) -> Memory:
         self.session.add(memory)
         self.session.commit()
