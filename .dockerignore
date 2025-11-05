@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+*.sqlite3
+*.db
+*.log
+*.env
+.DS_Store
+node_modules/
+dist/
+build/
+app/storage/
+MindDock_mid_report.md

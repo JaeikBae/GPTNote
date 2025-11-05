@@ -23,6 +23,15 @@ uvicorn app.main:app --reload
 
 실행 후 `http://localhost:8000/docs`에서 자동 생성된 OpenAPI 문서를 확인할 수 있습니다.
 
+### Docker 실행
+
+```bash
+chmod +x scripts/run_docker.sh
+./scripts/run_docker.sh
+```
+
+환경 변수로 `IMAGE_NAME`, `CONTAINER_NAME`, `HOST_PORT`, `ENV_FILE`을 전달해 빌드/실행 구성을 조정할 수 있습니다. 기본적으로 호스트의 `app/storage` 디렉터리가 컨테이너의 `/app/app/storage`에 마운트되어 첨부파일이 지속됩니다.
+
 ## 주요 API 요약
 
 - `POST /api/v1/users/`: 사용자 생성
