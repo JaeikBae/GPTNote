@@ -29,12 +29,21 @@ export interface Attachment {
   created_at: string;
 }
 
+export interface AssistantContextMemory {
+  memory_id: string;
+  title: string;
+  snippet: string;
+  score?: number | null;
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  context?: AssistantContextMemory[];
 }
 
 export interface AssistantResponse {
   reply: string;
   used_memory_ids: string[];
+  context: AssistantContextMemory[];
 }

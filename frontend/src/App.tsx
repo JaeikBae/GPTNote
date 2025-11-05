@@ -76,13 +76,16 @@ export default function App() {
     try {
       const response = await api.chat({
         message: userMessage.content,
+        owner_id: selectedUserId,
         memory_ids: selectedMemoryId ? [selectedMemoryId] : undefined,
         history: messages.map((msg) => ({ role: msg.role, content: msg.content }))
       });
-      setMessages([
-        ...history,
-        { role: "assistant", content: response.reply } as ChatMessage
-      ]);
+      const assistantMessage: ChatMessage = {
+        role: "assistant",
+        content: response.reply,
+        context: response.context
+      };
+      setMessages([...history, assistantMessage]);
     } catch (err) {
       console.error(err);
       setError("GPT 응답을 가져오지 못했습니다.");
@@ -205,6 +208,28 @@ export default function App() {
             {messages.map((message, index) => (
               <div key={index} className={`chat-bubble ${message.role}`}>
                 {message.content}
+                {message.role === "assistant" &&
+                  message.context &&
+                  message.context.length > 0 && (
+                    <div style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
+                      <strong>참고한 기억</strong>
+                      <ul style={{ marginTop: "0.35rem", paddingLeft: "1.25rem" }}>
+                        {message.context.map((ctx) => (
+                          <li key={ctx.memory_id}>
+                            <span style={{ display: "block", fontWeight: 600 }}>
+                              {ctx.title}
+                              {typeof ctx.score === "number"
+                                ? ` · 관련도 ${ctx.score.toFixed(2)}`
+                                : ""}
+                            </span>
+                            <span style={{ display: "block", opacity: 0.8 }}>
+                              {ctx.snippet}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
               </div>
             ))}
 

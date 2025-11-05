@@ -8,12 +8,14 @@ from sqlalchemy.orm import Session
 from app.models import Memory
 from app.repositories import MemoryRepository
 from app.schemas import MemoryCreate, MemoryUpdate
+from app.workflows import workflow_engine
 
 
 class MemoryService:
     """Service handling memory lifecycle."""
 
     def __init__(self, session: Session):
+        self.session = session
         self.repo = MemoryRepository(session)
 
     def create_memory(self, payload: MemoryCreate) -> Memory:
@@ -27,7 +29,13 @@ class MemoryService:
             source_location=payload.source_location,
             context=payload.context,
         )
-        return self.repo.create(memory)
+        memory = self.repo.create(memory)
+        workflow_engine.trigger(
+            "memory.created",
+            session=self.session,
+            payload={"memory_id": memory.id},
+        )
+        return memory
 
     def get_memory(self, memory_id: uuid.UUID) -> Memory | None:
         return self.repo.get(memory_id)
@@ -49,8 +57,20 @@ class MemoryService:
         if payload.context is not None:
             memory.context = payload.context
         memory.updated_at = datetime.utcnow()
-        return self.repo.update(memory)
+        memory = self.repo.update(memory)
+        workflow_engine.trigger(
+            "memory.updated",
+            session=self.session,
+            payload={"memory_id": memory.id},
+        )
+        return memory
 
     def delete_memory(self, memory: Memory) -> None:
+        memory_id = memory.id
         self.repo.delete(memory)
+        workflow_engine.trigger(
+            "memory.deleted",
+            session=self.session,
+            payload={"memory_id": memory_id},
+        )
 

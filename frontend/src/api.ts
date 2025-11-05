@@ -27,8 +27,11 @@ export const api = {
     request<Memory>(`/memories/${memoryId}`),
   chat: (payload: {
     message: string;
+    owner_id?: string | null;
     memory_ids?: string[];
     history?: { role: string; content: string }[];
+    top_k?: number;
+    use_rag?: boolean;
   }) =>
     request<AssistantResponse>("/assistant/chat", {
       method: "POST",
