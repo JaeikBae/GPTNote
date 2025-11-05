@@ -1,6 +1,7 @@
 """Pydantic schemas for request and response models."""
 
 from app.schemas.attachment import AttachmentCreate, AttachmentRead
+from app.schemas.assistant import AssistantChatRequest, AssistantChatResponse
 from app.schemas.memory import (
     MemoryCreate,
     MemoryRead,
@@ -10,6 +11,8 @@ from app.schemas.memory import (
 from app.schemas.user import UserCreate, UserRead
 
 __all__ = [
+    "AssistantChatRequest",
+    "AssistantChatResponse",
     "UserCreate",
     "UserRead",
     "MemoryCreate",

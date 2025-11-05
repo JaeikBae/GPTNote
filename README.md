@@ -32,6 +32,15 @@ chmod +x scripts/run_docker.sh
 
 환경 변수로 `IMAGE_NAME`, `CONTAINER_NAME`, `HOST_PORT`, `ENV_FILE`을 전달해 빌드/실행 구성을 조정할 수 있습니다. 기본적으로 호스트의 `app/storage` 디렉터리가 컨테이너의 `/app/app/storage`에 마운트되어 첨부파일이 지속됩니다.
 
+### 프론트엔드 (Vite + React)
+
+```bash
+chmod +x scripts/run_frontend.sh
+./scripts/run_frontend.sh
+```
+
+기본적으로 `http://localhost:5173`에서 동작하며, Vite 개발 서버가 `/api` 경로를 FastAPI 백엔드(`http://localhost:8000`)로 프록시합니다. 프로덕션 빌드는 `frontend` 디렉터리에서 `npm run build`로 생성할 수 있습니다.
+
 ## 주요 API 요약
 
 - `POST /api/v1/users/`: 사용자 생성
@@ -47,6 +56,8 @@ chmod +x scripts/run_docker.sh
 - `MINDDOCK_SQL_DATABASE_URL`: 데이터베이스 URL (기본값: 프로젝트 루트의 SQLite)
 - `MINDDOCK_STORAGE_DIR`: 첨부파일 저장 경로
 - `MINDDOCK_PROJECT_NAME`: API 문서 제목
+- `MINDDOCK_OPENAI_API_KEY`: OpenAI GPT 모델 호출 시 사용할 API 키 (미설정 시 로컬 요약 모드 응답 제공)
+- `MINDDOCK_OPENAI_MODEL`: 사용할 OpenAI 모델 이름 (기본값: `gpt-4o-mini`)
 
 ## 확장 고려 사항
 

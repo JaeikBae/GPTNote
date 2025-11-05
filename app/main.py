@@ -1,6 +1,7 @@
 """FastAPI application entry point for MindDock backend."""
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app import api
 from app.config import get_settings
@@ -14,6 +15,14 @@ def create_app() -> FastAPI:
     Base.metadata.create_all(bind=engine)
 
     app = FastAPI(title=settings.project_name)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allow_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        allow_credentials=True,
+    )
 
     @app.get("/health", tags=["system"])
     def health_check() -> dict[str, str]:

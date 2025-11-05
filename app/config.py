@@ -17,6 +17,9 @@ class Settings(BaseSettings):
         f"sqlite:///{Path(__file__).resolve().parent / 'minddock.db'}"
     )
     storage_dir: Path = Path(__file__).resolve().parent / "storage"
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    cors_allow_origins: list[str] = ["*"]
 
     model_config = SettingsConfigDict(env_prefix="MINDDOCK_", env_file=".env")
 
