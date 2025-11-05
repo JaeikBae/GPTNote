@@ -108,6 +108,81 @@ button {
   margin-top: 0;
 }
 
+.memory-actions {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.memory-action-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.memory-action-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.memory-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.form-field input,
+.form-field textarea {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cbd5f5;
+  border-radius: 0.6rem;
+  font: inherit;
+}
+
+.memory-action-card input[type="file"] {
+  font: inherit;
+}
+
+.memory-action-card button {
+  align-self: flex-start;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.memory-action-card button:hover {
+  background: #1d4ed8;
+}
+
+.memory-action-card button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.status-message {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.9rem;
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
