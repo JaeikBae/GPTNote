@@ -1,14 +1,15 @@
-import type { AssistantResponse, Memory, User } from "./types";
+import type { AssistantResponse, Attachment, Memory, User } from "./types";
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || "/api/v1";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const response = await fetch(`${BASE_URL}${path}`, {
+    ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options?.headers ?? {})
-    },
-    ...options
+    }
   });
 
   if (!response.ok) {
@@ -25,6 +26,30 @@ export const api = {
     request<Memory[]>(`/memories/?owner_id=${encodeURIComponent(ownerId)}`),
   getMemory: (memoryId: string) =>
     request<Memory>(`/memories/${memoryId}`),
+  createMemory: (payload: {
+    owner_id: string;
+    title: string;
+    content: string;
+    tags?: string[];
+    captured_at?: string | null;
+    source_device?: string | null;
+    source_location?: string | null;
+    context?: Record<string, unknown> | null;
+  }) =>
+    request<Memory>("/memories/", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
+  createMemoryFromAudio: (formData: FormData) =>
+    request<Memory>("/memories/transcribe", {
+      method: "POST",
+      body: formData
+    }),
+  uploadAttachment: (memoryId: string, formData: FormData) =>
+    request<Attachment>(`/memories/${memoryId}/attachments`, {
+      method: "POST",
+      body: formData
+    }),
   chat: (payload: {
     message: string;
     owner_id?: string | null;
