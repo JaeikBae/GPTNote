@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import (
@@ -95,14 +95,26 @@ async def create_memory_from_audio(
 
     tags_list = _parse_tags(tags)
     captured_at_dt = _parse_captured_at(captured_at)
+    recorded_at = captured_at_dt or datetime.now(timezone.utc)
     context_payload = _parse_context(context)
+    context_payload = context_payload or {}
+    context_payload.setdefault(
+        "transcription",
+        {
+            "source": "audio_transcription",
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "transcribed_at": datetime.now(timezone.utc).isoformat(),
+            "transcription_model": transcriber.settings.openai_transcription_model,
+        },
+    )
 
     memory_payload = MemoryCreate(
         owner_id=owner_id,
         title=_derive_title(transcript_text, title),
         content=transcript_text,
         tags=tags_list,
-        captured_at=captured_at_dt,
+        captured_at=recorded_at,
         source_device=source_device,
         source_location=source_location,
         context=context_payload,
@@ -189,12 +201,15 @@ def _parse_captured_at(raw: str | None) -> datetime | None:
     if not raw:
         return None
     try:
-        return datetime.fromisoformat(raw)
+        parsed = datetime.fromisoformat(raw)
     except ValueError as exc:  # noqa: B904
         raise HTTPException(
             status_code=400,
             detail="captured_at must be an ISO8601 datetime string",
         ) from exc
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _derive_title(transcript: str, provided: str | None) -> str:

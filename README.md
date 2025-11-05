@@ -70,6 +70,7 @@ chmod +x scripts/run_frontend.sh
 
 - `POST /api/v1/users/`: 사용자 생성
 - `POST /api/v1/memories/`: 기억 생성
+- `POST /api/v1/memories/transcribe`: 음성 파일을 업로드해 자동으로 텍스트 메모와 첨부 저장
 - `GET /api/v1/memories/?owner_id=...`: 사용자별 기억 조회
 - `POST /api/v1/memories/{memory_id}/attachments`: 첨부파일 업로드
 - `GET /api/v1/memories/{memory_id}/attachments/{attachment_id}`: 첨부파일 다운로드
@@ -83,6 +84,7 @@ chmod +x scripts/run_frontend.sh
 - `MINDDOCK_PROJECT_NAME`: API 문서 제목
 - `MINDDOCK_OPENAI_API_KEY`: OpenAI GPT 모델 호출 시 사용할 API 키 (미설정 시 로컬 요약 모드 응답 제공)
 - `MINDDOCK_OPENAI_MODEL`: 사용할 OpenAI 모델 이름 (기본값: `gpt-4o-mini`)
+- `MINDDOCK_OPENAI_TRANSCRIPTION_MODEL`: 음성 인식에 사용할 OpenAI 모델 이름 (기본값: `gpt-4o-transcribe`)
 - `MINDDOCK_OPENAI_EMBEDDING_MODEL`: RAG 임베딩에 사용할 OpenAI 모델 이름 (기본값: `text-embedding-3-small`)
 - `MINDDOCK_RAG_ENABLED`: RAG 파이프라인 활성화 여부 (기본값: `True`)
 - `MINDDOCK_RAG_DEFAULT_TOP_K`: RAG 검색 시 기본으로 가져오는 메모 개수 (기본값: `3`)
