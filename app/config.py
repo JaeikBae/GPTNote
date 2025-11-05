@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
+    openai_transcription_model: str = "gpt-4o-transcribe"
     cors_allow_origins: list[str] = ["*"]
     rag_enabled: bool = True
     rag_default_top_k: int = 3
